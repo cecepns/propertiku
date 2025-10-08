@@ -181,8 +181,9 @@ app.get('/api/properties', (req, res) => {
   const limit = 10;
   const offset = (page - 1) * limit;
   const categoryId = req.query.category_id;
+  const search = req.query.search;
 
-  let countQuery = 'SELECT COUNT(*) as total FROM properties';
+  let countQuery = 'SELECT COUNT(*) as total FROM properties p';
   let dataQuery = `
     SELECT p.*, c.name as category_name,
     (SELECT image_url FROM property_galleries WHERE property_id = p.id AND is_primary = 1 LIMIT 1) as primary_image
@@ -191,17 +192,30 @@ app.get('/api/properties', (req, res) => {
   `;
 
   const params = [];
+  const conditions = [];
 
   if (categoryId) {
-    countQuery += ' WHERE category_id = ?';
-    dataQuery += ' WHERE p.category_id = ?';
+    conditions.push('p.category_id = ?');
     params.push(categoryId);
+  }
+
+  if (search) {
+    conditions.push('(p.title LIKE ? OR p.description LIKE ? OR p.location LIKE ?)');
+    const searchPattern = `%${search}%`;
+    params.push(searchPattern, searchPattern, searchPattern);
+  }
+
+  if (conditions.length > 0) {
+    const whereClause = ' WHERE ' + conditions.join(' AND ');
+    countQuery += whereClause;
+    dataQuery += whereClause;
   }
 
   dataQuery += ' ORDER BY p.created_at DESC LIMIT ? OFFSET ?';
 
   db.query(countQuery, params, (err, countResults) => {
     if (err) {
+      console.error('Error in count query:', err);
       return res.status(500).json({ message: 'Server error' });
     }
 
@@ -210,6 +224,7 @@ app.get('/api/properties', (req, res) => {
 
     db.query(dataQuery, [...params, limit, offset], (err, results) => {
       if (err) {
+        console.error('Error in data query:', err);
         return res.status(500).json({ message: 'Server error' });
       }
 

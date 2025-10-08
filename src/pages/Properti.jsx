@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -13,6 +13,28 @@ const Properti = () => {
   const [pagination, setPagination] = useState({});
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const loadCategories = async () => {
+    try {
+      const response = await categoryAPI.getAll();
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadProperties = useCallback(async () => {
+    try {
+      const categoryId = selectedCategory || null;
+      const search = searchQuery.trim() || null;
+      const response = await propertyAPI.getAll(currentPage, categoryId, search);
+      setProperties(response.data.data);
+      setPagination(response.data.pagination);
+    } catch (error) {
+      console.error('Error loading properties:', error);
+    }
+  }, [currentPage, selectedCategory, searchQuery]);
 
   useEffect(() => {
     AOS.init({
@@ -24,28 +46,12 @@ const Properti = () => {
   }, []);
 
   useEffect(() => {
-    loadProperties();
-  }, [currentPage, selectedCategory]);
+    const timer = setTimeout(() => {
+      loadProperties();
+    }, 1000); // Debounce search by 300ms
 
-  const loadCategories = async () => {
-    try {
-      const response = await categoryAPI.getAll();
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
-  };
-
-  const loadProperties = async () => {
-    try {
-      const categoryId = selectedCategory || null;
-      const response = await propertyAPI.getAll(currentPage, categoryId);
-      setProperties(response.data.data);
-      setPagination(response.data.pagination);
-    } catch (error) {
-      console.error('Error loading properties:', error);
-    }
-  };
+    return () => clearTimeout(timer);
+  }, [loadProperties]);
 
   const handleCategoryChange = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -60,6 +66,11 @@ const Properti = () => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
   };
 
   const formatPrice = (price) => {
@@ -94,7 +105,7 @@ const Properti = () => {
     <div className="min-h-screen">
       <Navbar />
 
-      <section className="pt-24 pb-16 bg-blue-500 text-white">
+      <section className="pt-24 pb-16 bg-blue-800 text-white h-96 flex items-center">
         <div className="container mx-auto px-4" data-aos="fade-up">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Daftar Properti</h1>
           <p className="text-xl text-white">Temukan properti terbaik untuk Anda</p>
@@ -103,20 +114,32 @@ const Properti = () => {
 
       <section className="py-12 bg-blue-50">
         <div className="container mx-auto px-4">
-          <div className="mb-8" data-aos="fade-up">
-            <label className="block text-gray-700 font-semibold mb-2">Filter Kategori:</label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              className="w-full md:w-64 px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-md hover:shadow-lg transition-all"
-            >
-              <option value="">Semua Kategori</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4" data-aos="fade-up">
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Cari Properti:</label>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Cari berdasarkan judul, deskripsi, atau lokasi..."
+                className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-md hover:shadow-lg transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Filter Kategori:</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-md hover:shadow-lg transition-all"
+              >
+                <option value="">Semua Kategori</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

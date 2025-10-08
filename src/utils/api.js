@@ -29,10 +29,13 @@ export const categoryAPI = {
 };
 
 export const propertyAPI = {
-  getAll: (page = 1, categoryId = null) => {
+  getAll: (page = 1, categoryId = null, search = null) => {
     let url = `/properties?page=${page}`;
     if (categoryId) {
       url += `&category_id=${categoryId}`;
+    }
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
     }
     return api.get(url);
   },
