@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Building2 } from "lucide-react";
-import Logo from '../assets/logo.png';
+import Logo from '../assets/logo.jpeg';
 
 const Navbar = () => {
   return (
@@ -8,7 +8,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-blue-600 hover:text-blue-700 transition-all">
-            <img src={Logo} className="w-20 h-auto" />
+            <img src={Logo} className="w-32 md:w-44 h-auto" />
           </Link>
 
           <div className="flex space-x-8">

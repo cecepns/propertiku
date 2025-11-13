@@ -83,7 +83,7 @@ const PropertiDetail = () => {
     <div className="min-h-screen">
       <Navbar />
 
-      <div className="pt-20 bg-blue-50 min-h-screen">
+      <div className="pt-32 bg-blue-50 min-h-screen">
         <div className="container mx-auto px-4 py-8">
           <Link to="/properti" className="text-blue-600 hover:text-blue-700 mb-4 inline-block font-semibold">
             &larr; Kembali ke Daftar Properti

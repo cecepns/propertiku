@@ -5,6 +5,7 @@ import 'aos/dist/aos.css';
 import { propertyAPI, categoryAPI, getImageUrl } from '../utils/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import bannerImage from '../assets/banner.jpeg';
 import { 
   Home as HomeIcon, 
   Building2, 
@@ -18,13 +19,6 @@ import {
   LandPlot,
   Building,
   Store,
-  CheckCircle2,
-  FileCheck,
-  Droplets,
-  Route,
-  MoveHorizontal,
-  Tag,
-  Gift
 } from 'lucide-react';
 
 const Home = () => {
@@ -73,6 +67,46 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
+
+      {/* Banner Section */}
+      <section className="relative mt-[110px] md:mt-[150px] h-44 md:h-[700px] overflow-hidden">
+        <div className="absolute inset-0">
+          <img 
+            src={bannerImage}
+            alt="Banner Properti"
+            className="w-full h-full object-cover"
+          />
+          {/* <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 via-blue-800/50 to-blue-900/70"></div> */}
+        </div>
+        
+        {/* <div className="relative z-10 h-full flex items-center">
+          <div className="container mx-auto px-4 w-full">
+            <div className="max-w-2xl" data-aos="fade-right">
+              <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg mb-4">
+                <Sparkles className="w-5 h-5 text-yellow-500" />
+                <span className="text-sm font-semibold text-blue-600">Selamat Datang di PROPERTIKU</span>
+              </div>
+              
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
+                Raih Impian Memiliki Properti Ideal Anda
+              </h2>
+              
+              <p className="text-lg md:text-xl text-white mb-6 drop-shadow leading-relaxed">
+                Kami hadirkan solusi properti terpercaya dengan pilihan terlengkap dan harga terbaik
+              </p>
+              
+              <Link
+                to="/properti"
+                className="inline-flex items-center gap-2 bg-white hover:bg-blue-50 text-blue-600 px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1"
+              >
+                <Search className="w-5 h-5" />
+                Mulai Cari Properti
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </div> */}
+      </section>
 
       {/* Hero Section */}
       <section className="relative min-h-screen bg-blue-800 flex items-center overflow-hidden">
@@ -219,7 +253,7 @@ const Home = () => {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20 bg-blue-100">
+      {/* <section className="py-20 bg-blue-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-blue-600">
@@ -260,7 +294,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Featured Properties Section */}
       <section className="py-20 bg-blue-50">

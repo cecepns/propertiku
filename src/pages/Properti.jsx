@@ -14,6 +14,7 @@ const Properti = () => {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadCategories = async () => {
     try {
@@ -26,6 +27,7 @@ const Properti = () => {
 
   const loadProperties = useCallback(async () => {
     try {
+      setIsLoading(true);
       const categoryId = selectedCategory || null;
       const search = searchQuery.trim() || null;
       const response = await propertyAPI.getAll(currentPage, categoryId, search);
@@ -33,6 +35,8 @@ const Properti = () => {
       setPagination(response.data.pagination);
     } catch (error) {
       console.error('Error loading properties:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, [currentPage, selectedCategory, searchQuery]);
 
@@ -81,6 +85,29 @@ const Properti = () => {
     }).format(price);
   };
 
+  const LoaderSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[1, 2, 3, 4, 5, 6].map((index) => (
+        <div
+          key={index}
+          className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-blue-100"
+        >
+          <div className="h-48 bg-gray-200 animate-pulse"></div>
+          <div className="p-6">
+            <div className="h-4 bg-gray-200 rounded animate-pulse mb-3 w-1/3"></div>
+            <div className="h-6 bg-gray-200 rounded animate-pulse mb-3 w-2/3"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="flex justify-between mb-4">
+              <div className="h-6 bg-gray-200 rounded animate-pulse w-1/3"></div>
+              <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
+            </div>
+            <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   const renderPagination = () => {
     const pages = [];
     for (let i = 1; i <= pagination.totalPages; i++) {
@@ -105,7 +132,7 @@ const Properti = () => {
     <div className="min-h-screen">
       <Navbar />
 
-      <section className="pt-24 pb-16 bg-blue-800 text-white h-96 flex items-center">
+      <section className="pt-44 pb-16 bg-blue-800 text-white h-96 flex items-center">
         <div className="container mx-auto px-4" data-aos="fade-up">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Daftar Properti</h1>
           <p className="text-xl text-white">Temukan properti terbaik untuk Anda</p>
@@ -142,57 +169,63 @@ const Properti = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((property, index) => (
-              <div
-                key={property.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-blue-100"
-                data-aos="fade-up"
-                data-aos-delay={index * 50}
-              >
-                <div className="h-48 bg-gray-200">
-                  {property.primary_image ? (
-                    <img
-                      src={getImageUrl(property.primary_image)}
-                      alt={property.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No Image
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mb-2">
-                    {property.category_name}
-                  </span>
-                  {property.status === 'sold' && (
-                    <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded mb-2 ml-2">
-                      Terjual
-                    </span>
-                  )}
-                  <h3 className="text-xl font-bold mb-2">{property.title}</h3>
-                  <p className="text-gray-600 mb-4">{property.location}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-blue-600">
-                      {formatPrice(property.price)}
-                    </span>
-                    <span className="text-sm text-gray-500">{property.size}</span>
-                  </div>
-                  <Link
-                    to={`/properti/${property.id}`}
-                    className="mt-4 block w-full bg-blue-800 hover:bg-blue-700 text-white text-center py-2 rounded transition"
+          {isLoading ? (
+            <LoaderSkeleton />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {properties.map((property, index) => (
+                  <div
+                    key={property.id}
+                    className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-blue-100"
+                    data-aos="fade-up"
+                    data-aos-delay={index * 50}
                   >
-                    Detail
-                  </Link>
-                </div>
+                    <div className="h-48 bg-gray-200">
+                      {property.primary_image ? (
+                        <img
+                          src={getImageUrl(property.primary_image)}
+                          alt={property.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-6">
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mb-2">
+                        {property.category_name}
+                      </span>
+                      {property.status === 'sold' && (
+                        <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded mb-2 ml-2">
+                          Terjual
+                        </span>
+                      )}
+                      <h3 className="text-xl font-bold mb-2">{property.title}</h3>
+                      <p className="text-gray-600 mb-4">{property.location}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-2xl font-bold text-blue-600">
+                          {formatPrice(property.price)}
+                        </span>
+                        <span className="text-sm text-gray-500">{property.size}</span>
+                      </div>
+                      <Link
+                        to={`/properti/${property.id}`}
+                        className="mt-4 block w-full bg-blue-800 hover:bg-blue-700 text-white text-center py-2 rounded transition"
+                      >
+                        Detail
+                      </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {properties.length === 0 && (
-            <p className="text-center text-gray-500 text-xl mt-8">Tidak ada properti ditemukan</p>
+              {properties.length === 0 && (
+                <p className="text-center text-gray-500 text-xl mt-8">Tidak ada properti ditemukan</p>
+              )}
+            </>
           )}
 
           {pagination.totalPages > 1 && (
